@@ -44,7 +44,7 @@ if ($sessionId) {
 <body id="pageBody" class="bg-light text-dark">
     <nav class="navbar sticky-top navbar-expand-lg row border-bottom border-dark mx-4">
         <div class="col">
-            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php"><i class="fas fa-chess-queen"></i></a>
+            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php"><i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i></a>
         </div>
         <div class="col-6"></div>
         <div class="col d-flex justify-content-end">
