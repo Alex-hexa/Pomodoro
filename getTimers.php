@@ -14,7 +14,7 @@ $options = [
 ];
 
 // Requête MongoDB pour récupérer les minuteurs de l'utilisateur, triés par ordre d'insertion et filtrés par userId
-$timers = $collection->find(['userId' => $userId], $options); // Ajout du filtre 'userId'
+$timers = $collection->find(['userId' => $userId], $options);
 
 // Convertir les documents en tableau
 $timersArray = [];
@@ -25,9 +25,7 @@ foreach ($timers as $timer) {
     // Convertir la date au format 'd/M/Y H:i:s' pour l'affichage
     $startedAtObj = DateTime::createFromFormat('d/M/Y H:i:s', $startedAt);
     if ($startedAtObj === false) {
-        // Si la conversion échoue, afficher une erreur ou ignorer ce minuteur
-        echo "Erreur de conversion pour la date : $startedAt";
-        continue;
+        continue; // Ignorer les minuteurs avec des dates invalides
     }
 
     // Formater la date pour l'affichage en 'd/M/Y H:i:s'
@@ -39,6 +37,12 @@ foreach ($timers as $timer) {
         'duration' => (int)$timer['duration'], // Durée du minuteur en secondes
         'startedAt' => $formattedDate // La date formatée
     ];
+}
+
+// Si aucun minuteur n'est trouvé, afficher un message
+if (empty($timersArray)) {
+    echo '<li class="list-group-item text-center text-muted">Aucun minuteur trouvé. Créez-en un pour commencer ! PS : Si vous en avez déjà créé, rechargez la page ;)</li>';
+    return;
 }
 
 // Renvoyer le tableau sous forme de HTML
