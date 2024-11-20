@@ -1,0 +1,10 @@
+body {
+    overflow-x: hidden;
+}
+
+.container {
+    overflow-x: hidden;
+}
+.hidden {
+    visibility: hidden;
+}
