@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($data['userId']) && isset($data['duration'])) {
         $userId = $data['userId'];
         $duration = $data['duration'];
+        $uniq_id_timer = $data['uniq_id_timer'];
 
         // Now, log the timer duration in the database
         $client = getMongoClient();
@@ -21,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $collection->insertOne([
             'userId' => $userId,
             'duration' => $duration,
-            'startedAt' => date('d/M/Y H:i:s')
+            'startedAt' => date('d/M/Y H:i:s'),
+            'uniq_id_timer' => $uniq_id_timer
         ]);
 
         // Return a success response

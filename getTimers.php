@@ -35,7 +35,8 @@ foreach ($timers as $timer) {
         '_id' => (string)$timer['_id'], // ID du minuteur
         'userId' => $timer['userId'],
         'duration' => (int)$timer['duration'], // Durée du minuteur en secondes
-        'startedAt' => $formattedDate // La date formatée
+        'startedAt' => $formattedDate, // La date formatée
+        'uniq_id_timer' => $timer['uniq_id_timer']
     ];
 }
 
@@ -52,7 +53,7 @@ foreach ($timersArray as $timer) {
     echo "Durée : {$timer['duration']} secondes, fait le {$timer['startedAt']}";
     echo '<div>';
     echo '<button class="btn btn-primary btn-sm mr-1" onclick="fillTimer(' . $timer['duration'] . ')"><i class="fa-solid fa-plus"></i></button>';
-    echo '<button class="btn btn-danger btn-sm" onclick="deleteTimer(\'' . $timer['startedAt'] . '\')"><i class="fa-solid fa-trash"></i></button>';
+    echo '<button class="btn btn-danger btn-sm" onclick="deleteTimer(\'' . $timer['uniq_id_timer'] . '\')"><i class="fa-solid fa-trash"></i></button>';
     echo '</div>';
     echo '</li>';
 }

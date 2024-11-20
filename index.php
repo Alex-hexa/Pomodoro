@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenue</title>
+    <link rel="icon" href="/image/favicon.png" type="image/png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
@@ -77,7 +78,7 @@
         <h2 class="pt-3 pb-2">Mes Minuteurs :</h2>
         <ul id="timerList" class="list-group list-group-flush border border-2 border-secondary rounded bg-light" style="max-height: 300px; overflow-y: auto;">
             <?php include('getTimers.php'); ?>
-        </ul>
+        </ul>       
     </div>
 
     <script>

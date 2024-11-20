@@ -102,14 +102,14 @@ document.getElementById('pauseTimer').onclick = function () {
     }
 };
 
-async function deleteTimer(startedAt) {
+async function deleteTimer(uniq_id_timer) {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce minuteur ?")) {
         const response = await fetch('deleteTimer.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: 'startedAt=' + encodeURIComponent(startedAt)
+            body: 'uniq_id_timer=' + encodeURIComponent(uniq_id_timer)
         });
 
         const data = await response.json();
