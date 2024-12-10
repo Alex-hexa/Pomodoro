@@ -5,6 +5,36 @@ body {
 .container {
     overflow-x: hidden;
 }
+
 .hidden {
     visibility: hidden;
+}
+
+.reaction-container {
+    position: relative;
+    display: inline-block;
+    margin-top: 20px;
+    /* pour éloigner un peu du reste */
+}
+
+#emojiMenu {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    /* Le menu apparaît à droite du bouton */
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 5px;
+    display: flex;
+    /* Affichage en ligne */
+    gap: 5px;
+    /* Espace entre les emojis */
+    z-index: 9999;
+    /* s'assurer qu'il est au-dessus */
+}
+
+.emoji-option {
+    cursor: pointer;
+    font-size: 1.5rem;
 }

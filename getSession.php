@@ -19,10 +19,11 @@ if (isset($_GET['sessionId'])) {
 
         echo json_encode([
             'status' => 'success',
-            'timer' => $remaining,
+            'timer' => $session['timer'],
             'isPaused' => $session['isPaused'],
             'host' => $session['host'],
-            'participants' => $session['participants']
+            'participants' => $session['participants'],
+            'reactions' => $session['reactions'] ?? new stdClass()
         ]);
     }
 } else {

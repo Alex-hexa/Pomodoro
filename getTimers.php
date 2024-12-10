@@ -1,8 +1,6 @@
 <?php
 require 'db.php';
 
-$userId = $_COOKIE['userId']; // Obtenez l'ID utilisateur à partir du cookie
-
 // Connexion à MongoDB
 $client = getMongoClient();
 $collection = $client->myDatabase->timers; // Remplacez 'myDatabase' par votre base de données
@@ -12,6 +10,8 @@ $options = [
     'sort' => ['_id' => -1], // Trier par '_id' en ordre décroissant (les plus récents d'abord)
     'limit' => 15 // Limiter à 15 documents
 ];
+
+$userId = $_COOKIE['userId']; // Obtenez l'ID utilisateur à partir du cookie
 
 // Requête MongoDB pour récupérer les minuteurs de l'utilisateur, triés par ordre d'insertion et filtrés par userId
 $timers = $collection->find(['userId' => $userId], $options);
