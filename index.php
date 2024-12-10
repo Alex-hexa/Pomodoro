@@ -28,25 +28,24 @@
 </head>
 
 <body id="pageBody" class="bg-light text-dark">
-    <nav class="navbar sticky-top navbar-expand-lg row border-bottom border-dark mx-4">
-        <div class="col">
-            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php"><i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i></a>
+    <nav class="navbar sticky-top navbar-expand-lg d-flex border-bottom border-dark mx-4">
+        <div class="flex-grow-1">
+            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php">
+                <i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i>
+            </a>
         </div>
-        <div class="col-6"></div>
-        <div class="col d-flex justify-content-end">
-            <button id="toggleMode" class="btn btn-outline-dark mr-3"><i class="fas fa-moon"></i></button>
-            <div class="dropdown mr-3">
-                <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/sharedSession.php">Créer une session partagée</a></li>
-                    <li><a class="dropdown-item" href="/joinSession.php">Rejoindre via un ID</a></li>
-                </ul>
-            </div>
-            <a href="/profil.php" class="btn btn-primary mr-3"><i class="fas fa-user"></i></a>
-            <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
+        <button id="toggleMode" class="btn btn-outline-dark mr-3"><i class="fas fa-moon"></i></button>
+        <div class="dropdown mr-3">
+            <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/createSession.php">Créer une session partagée</a></li>
+                <li><a class="dropdown-item" href="/joinSession.php">Rejoindre via un ID</a></li>
+            </ul>
         </div>
+        <a href="/profil.php" class="btn btn-primary mr-3"><i class="fas fa-user"></i></a>
+        <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
     </nav>
     <div class="container">
         <span class="hidden" id="userId"></span>
@@ -69,16 +68,16 @@
                 </div>
             </div>
             <div class="d-flex justify-content-center">
-                <button id="startTimer" class="btn btn-lg btn-primary m-1">Démarrer le minuteur</button>
-                <button id="pauseTimer" class="btn btn-lg btn-warning m-1" disabled>Pause</button>
-                <button id="resetTimer" class="btn btn-lg btn-danger m-1" disabled>Réinitialiser</button>
+                <button id="startTimer" class="btn btn-lg btn-primary m-1"><i class="fa-solid fa-play"></i></button>
+                <button id="pauseTimer" class="btn btn-lg btn-warning m-1" disabled><i class="fa-solid fa-pause"></i></button>
+                <button id="resetTimer" class="btn btn-lg btn-danger m-1" disabled><i class="fa-solid fa-rotate-right"></i></button>
             </div>
         </div>
 
         <h2 class="pt-3 pb-2">Mes Minuteurs :</h2>
         <ul id="timerList" class="list-group list-group-flush border border-2 border-secondary rounded bg-light" style="max-height: 300px; overflow-y: auto;">
             <?php include('getTimers.php'); ?>
-        </ul>       
+        </ul>
     </div>
 
     <script>

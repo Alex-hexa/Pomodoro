@@ -1,219 +1,190 @@
 <?php
-require('./session.php'); // Incluez le fichier qui gère les sessions
-
-$userName = $_COOKIE['username']; // Récupérez le nom de l'utilisateur connecté
-$sessionId = $_COOKIE['session'] ?? null; // Obtenez l'ID de session à partir du cookie
-
-// Connexion à MongoDB
-$client = getMongoClient();
-$collection = $client->myDatabase->sessions; // Remplacez par votre nom de base de données
-
-if ($sessionId) {
-    // Récupérez les détails de la session pour l'affichage
-    $session = getActiveSession($sessionId); // Assurez-vous d'avoir la fonction pour obtenir une session active
-
-    // Vérifiez si la session a été trouvée
-    if ($session) {
-        $participants = $session['participants']; // Accéder aux participants
-        $timer = $session['timer']; // Accéder au minuteur
-    } else {
-        die("Session non trouvée.");
-    }
-} else {
-    die("Aucun ID de session fourni.");
+require('./session.php');
+$userName = $_COOKIE['username'] ?? 'Inconnu';
+$sessionId = $_GET['sessionId'] ?? '';
+$session = getActiveSession($sessionId);
+if (!$session) {
+    die("Session non trouvée.");
 }
+$isHost = ($session['host'] === $userName);
+
+$sessionUrl = "http://" . $_SERVER['HTTP_HOST'] . "/sharedSession.php?sessionId=" . urlencode($sessionId);
+
+$currentTimer = $session['timer'];
+$hrs = floor($currentTimer / 3600);
+$mins = floor(($currentTimer % 3600) / 60);
+$secs = $currentTimer % 60;
 ?>
 <!DOCTYPE html>
 <html lang="fr-FR">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Session Partagée</title>
+    <link rel="icon" href="/image/favicon.png" type="image/png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="./node_modules/@fortawesome/fontawesome-free/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
+    <title>Session Partagée</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="./js/pomodoro.js" defer></script>
-    <script src="./js/jwtDecoder.js"></script>
+    <script src="./js/jwtDecoder.js" defer></script>
     <script src="./js/storageChecker.js" defer></script>
-</head>
-
-<body id="pageBody" class="bg-light text-dark">
-    <nav class="navbar sticky-top navbar-expand-lg row border-bottom border-dark mx-4">
-        <div class="col">
-            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php"><i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i></a>
-        </div>
-        <div class="col-6"></div>
-        <div class="col d-flex justify-content-end">
-            <button id="toggleMode" class="btn btn-outline-dark mr-2"><i class="fas fa-moon"></i></button>
-            <a href="/profile.php" class="btn btn-primary mr-2"><i class="fas fa-user"></i></a>
-            <a href="/logout.php" class="btn btn-danger mr-2"><i class="fas fa-right-from-bracket"></i></a>
-        </div>
-    </nav>
-
-    <div class="container">
-        <span class="hidden" id="userId"></span>
-        <h1 class="pt-5">Session Partagée</h1>
-        <h2>Hôte : <?= htmlspecialchars($userName) ?></h2>
-        <h2>Session : <?= htmlspecialchars($sessionId) ?></h2> <!-- Affiche l'ID de session -->
-
-        <div id="memberList" class="mt-3">
-            <h2>Membres de la session</h2>
-            <ul id="members" class="list-group">
-                <?php foreach ($participants as $participant): ?>
-                    <li class="list-group-item" style="color: <?= $participant === $userName ? 'blue' : 'black'; ?>">
-                        <?= htmlspecialchars($participant) ?>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        </div>
-
-        <div class="mt-3">
-            <strong>Durée de la Session :</strong> <span id="sessionDuration"><?= gmdate("H:i:s", $timer) ?></span>
-        </div>
-
-        <h3 class="py-2 display-2 fw-bold d-flex justify-content-center" id="countdown">0h 0m 0s</h3>
-
-        <div id="sharedTimer" class="mt-5">
-            <h2 class="pt-2">Configurer le minuteur Pomodoro</h2>
-            <div class="row">
-                <div class="form-group form-group-lg col">
-                    <label for="hours">Heures :</label>
-                    <input type="number" id="hours" class="form-control" min="0" max="23">
-                </div>
-                <div class="form-group form-group-lg col">
-                    <label for="minutes">Minutes :</label>
-                    <input type="number" id="minutes" class="form-control" min="0" max="59">
-                </div>
-                <div class="form-group form-group-lg col">
-                    <label for="seconds">Secondes :</label>
-                    <input type="number" id="seconds" class="form-control" min="0" max="59">
-                </div>
-            </div>
-            <div class="d-flex justify-content-center">
-                <button id="startSharedTimer" class="btn btn-lg btn-primary m-1">Démarrer le minuteur</button>
-                <button id="pauseSharedTimer" class="btn btn-lg btn-warning m-1" disabled>Pause</button>
-                <button id="stopSharedTimer" class="btn btn-lg btn-danger m-1" disabled>Arrêter</button>
-            </div>
-        </div>
-    </div>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        let sharedTotalSeconds = 0;
-        let sharedInterval;
-        let isSharedPaused = false;
-        let members = []; // Tableau pour stocker les membres
+        const sessionHost = "<?= htmlspecialchars($session['host']) ?>";
+        const currentUser = "<?= htmlspecialchars($userName) ?>";
+        const sessionId = "<?= htmlspecialchars($sessionId) ?>";
+        const sessionUrl = "<?= $sessionUrl ?>";
 
-        // Ajouter l'hôte à la liste des membres
-        members.push({
-            name: '<?= htmlspecialchars($userName) ?>',
-            host: true
-        });
+        let timerInterval = null;
 
-        function updateMemberList() {
-            const memberList = document.getElementById('members');
-            memberList.innerHTML = ''; // Efface la liste actuelle
-            members.forEach(member => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-                listItem.textContent = member.name;
-                listItem.style.color = member.host ? 'blue' : 'black'; // Met l'hôte en bleu
-                memberList.appendChild(listItem);
+        function fetchSessionState() {
+            $.getJSON('getSession.php', {sessionId: sessionId}, function(data) {
+                if (data.status === 'success') {
+                    const timer = data.timer;
+                    const hrs = Math.floor(timer / 3600);
+                    const mins = Math.floor((timer % 3600) / 60);
+                    const secs = timer % 60;
+
+                    $('#countdown').text(`${hrs}h ${mins}m ${secs}s`);
+
+                    $('#participantList').empty();
+                    data.participants.forEach(p => {
+                        let className = '';
+                        if (p === sessionHost) {
+                            className = 'text-danger';
+                        } else if (p === currentUser) {
+                            className = 'text-primary';
+                        }
+                        $('#participantList').append(`<li class="${className}">${p}</li>`);
+                    });
+
+                    if (!data.isPaused && timer > 0) {
+                        startLocalCountDown(timer);
+                    } else {
+                        if (timerInterval) clearInterval(timerInterval);
+                    }
+                }
             });
         }
 
-        // Initialiser la liste des membres
-        updateMemberList();
-
-        document.getElementById('startSharedTimer').onclick = function() {
-            const hours = parseInt(document.getElementById('hours').value) || 0;
-            const minutes = parseInt(document.getElementById('minutes').value) || 0;
-            const seconds = parseInt(document.getElementById('seconds').value) || 0;
-
-            sharedTotalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-
-            // Désactive les champs d'entrée après le démarrage
-            document.getElementById('hours').disabled = true;
-            document.getElementById('minutes').disabled = true;
-            document.getElementById('seconds').disabled = true;
-
-            updateCountdown(); // Commence le compte à rebours
-        };
-
-        function updateCountdown() {
-            if (sharedTotalSeconds <= 0) {
-                document.getElementById('countdown').innerHTML = "Temps écoulé!";
-                clearInterval(sharedInterval);
-                return;
-            }
-
-            sharedInterval = setInterval(() => {
-                if (isSharedPaused) return; // Si en pause, ne pas décrémenter
-
-                const hrs = Math.floor(sharedTotalSeconds / 3600);
-                const mins = Math.floor((sharedTotalSeconds % 3600) / 60);
-                const secs = sharedTotalSeconds % 60;
-
-                document.getElementById('countdown').innerHTML =
-                    `${String(hrs).padStart(2, '0')}h ${String(mins).padStart(2, '0')}m ${String(secs).padStart(2, '0')}s`;
-
-                sharedTotalSeconds--;
-
-                if (sharedTotalSeconds < 0) {
-                    clearInterval(sharedInterval);
-                    document.getElementById('countdown').innerHTML = "Temps écoulé!";
+        function startLocalCountDown(timerValue) {
+            if (timerInterval) clearInterval(timerInterval);
+            let currentTimer = timerValue;
+            timerInterval = setInterval(() => {
+                currentTimer--;
+                if (currentTimer <= 0) {
+                    clearInterval(timerInterval);
                 }
+                const hrs = Math.floor(currentTimer / 3600);
+                const mins = Math.floor((currentTimer % 3600) / 60);
+                const secs = currentTimer % 60;
+                $('#countdown').text(`${hrs}h ${mins}m ${secs}s`);
             }, 1000);
         }
 
-        document.getElementById('pauseSharedTimer').onclick = function() {
-            isSharedPaused = !isSharedPaused;
-            this.innerText = isSharedPaused ? "Reprendre" : "Pause";
-        };
+        $(document).ready(function() {
+            fetchSessionState();
+            setInterval(fetchSessionState, 10000);
 
-        document.getElementById('stopSharedTimer').onclick = function() {
-            clearInterval(sharedInterval);
-            sharedTotalSeconds = 0; // Réinitialise le minuteur
-            document.getElementById('countdown').innerHTML = "0h 0m 0s"; // Réinitialise l'affichage
-        };
+            $('#sessionIdSpan').on('click', function() {
+                navigator.clipboard.writeText(sessionUrl).then(() => {
+                    const message = $('#copyMessage');
+                    message.show();
+                    setTimeout(() => {
+                        message.hide();
+                    }, 3000);
+                }).catch(err => {
+                    console.error('Impossible de copier le lien : ', err);
+                });
+            });
 
-        // Toggle dark mode functionality
-        document.getElementById('toggleMode').onclick = function() {
-            const body = document.getElementById('pageBody');
-            body.classList.toggle('bg-dark');
-            body.classList.toggle('text-light');
-            body.classList.toggle('bg-light');
-            body.classList.toggle('text-dark');
+            // Mise à jour de la durée par l'hôte
+            $('#updateDurationBtn').on('click', function(e) {
+                e.preventDefault();
+                const h = parseInt($('#hoursInput').val()) || 0;
+                const m = parseInt($('#minutesInput').val()) || 0;
+                const s = parseInt($('#secondsInput').val()) || 0;
+                const totalSeconds = (h * 3600) + (m * 60) + s;
 
-            const navbar = document.querySelector('nav');
-            navbar.classList.toggle('border-light');
-            navbar.classList.toggle('border-dark');
-
-            const memberList = document.getElementById('members');
-            memberList.classList.toggle('bg-dark');
-            memberList.classList.toggle('text-light');
-
-            const listItems = memberList.getElementsByTagName('li');
-            for (let i = 0; i < listItems.length; i++) {
-                listItems[i].classList.toggle('bg-light');
-                listItems[i].classList.toggle('text-dark');
-            }
-
-            const toggleButton = document.getElementById('toggleMode');
-            if (body.classList.contains('bg-dark')) {
-                toggleButton.classList = 'btn btn-outline-light mr-2';
-                toggleButton.innerHTML = '<i class="fas fa-sun"></i>';
-            } else {
-                toggleButton.classList = 'btn btn-outline-dark mr-2';
-                toggleButton.innerHTML = '<i class="fas fa-moon"></i>';
-            }
-        };
-
-        // URL handling for unique sessions
-        const urlParams = new URLSearchParams(window.location.search);
+                $.post('updateTimer.php', { sessionId: sessionId, action: 'setDuration', duration: totalSeconds }, function(data) {
+                    if (data.status === 'success') {
+                        fetchSessionState();
+                    } else {
+                        console.error(data.message);
+                    }
+                }, 'json');
+            });
+        });
     </script>
-</body>
+</head>
 
+<body>
+    <nav class="navbar sticky-top navbar-expand-lg d-flex border-bottom border-dark mx-4">
+        <div class="flex-grow-1">
+            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php">
+                <i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i>
+            </a>
+        </div>
+        <div class="dropdown mr-3">
+            <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/createSession.php">Créer une session partagée</a></li>
+                <li><a class="dropdown-item" href="/joinSession.php">Rejoindre via un ID</a></li>
+            </ul>
+        </div>
+        <a href="/profil.php" class="btn btn-primary mr-3"><i class="fas fa-user"></i></a>
+        <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
+    </nav>
+
+    <div class="container-fluid pt-4">
+        <div id="copyMessage" class="alert alert-success" style="display:none;">
+            Le lien de la session a été copié !
+        </div>
+        <h2>Session: <span id="sessionIdSpan" class="text-success" style="cursor: pointer;"><?= htmlspecialchars($sessionId) ?></span></h2>
+        <h3 class="py-2">Hôte : <span class="text-danger"><?= htmlspecialchars($session['host']) ?></span></h3>
+        <h3 class="pb-1">Vous êtes : <span class="text-primary"><?= htmlspecialchars($userName) ?> <?= $isHost ? '(Hôte)' : '' ?></span></h3>
+
+        <div class="py-4">
+            <h3>Timer: <span class="text-primary d-flex justify-content-center" id="countdown"></span></h3>
+            <?php if ($isHost): ?>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-primary m-1" id="startBtn"><i class="fa-solid fa-play"></i></button>
+                    <button class="btn btn-warning m-1" id="pauseBtn"><i class="fa-solid fa-pause"></i></button>
+                    <button class="btn btn-danger m-1" id="resetBtn"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-center">
+                    <div class="form-inline">
+                        <input type="number" id="hoursInput" class="form-control m-1" placeholder="Heures" min="0" value="<?= $hrs ?>">
+                        <input type="number" id="minutesInput" class="form-control m-1" placeholder="Minutes" min="0" max="59" value="<?= $mins ?>">
+                        <input type="number" id="secondsInput" class="form-control m-1" placeholder="Secondes" min="0" max="59" value="<?= $secs ?>">
+                        <button class="btn btn-info m-1" id="updateDurationBtn">Mettre à jour la durée</button>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p class="text-danger">Seul l’hôte peut contrôler le timer.</p>
+            <?php endif; ?>
+        </div>
+
+        <div>
+            <h3>Participants:</h3>
+            <ul id="participantList">
+                <?php foreach ($session['participants'] as $part): ?>
+                    <?php
+                    $className = '';
+                    if ($part === $session['host']) {
+                        $className = 'text-danger';
+                    } elseif ($part === $userName) {
+                        $className = 'text-primary';
+                    }
+                    ?>
+                    <li class="<?= $className ?>"><?= htmlspecialchars($part) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    </div>
+</body>
 </html>

@@ -102,6 +102,29 @@ document.getElementById('pauseTimer').onclick = function () {
     }
 };
 
+// Fonction pour afficher une alerte Bootstrap
+function showBootstrapAlert(message, type = 'success') {
+    // type peut être 'success', 'danger', 'warning', 'info', etc.
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+    alertContainer.setAttribute('role', 'alert');
+    alertContainer.innerHTML = `
+        ${message}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    `;
+
+    // Ajouter l'alerte en haut de la page ou dans un container dédié
+    document.querySelector('body').prepend(alertContainer);
+
+    // Optionnel : auto-fermeture de l'alerte après quelques secondes
+    setTimeout(() => {
+        (alertContainer).alert('close');
+    }, 3000);
+}
+
+// Votre fonction deleteTimer modifiée :
 async function deleteTimer(uniq_id_timer) {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce minuteur ?")) {
         const response = await fetch('deleteTimer.php', {
@@ -114,11 +137,10 @@ async function deleteTimer(uniq_id_timer) {
 
         const data = await response.json();
         if (data.status === 'success') {
-            alert(data.message);
-            // Refresh the timer list after successful deletion
+            showBootstrapAlert(data.message, 'success');
             await refreshTimerList();
         } else {
-            alert(data.message);
+            showBootstrapAlert(data.message, 'danger');
         }
     }
 }

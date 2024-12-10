@@ -78,25 +78,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 
 <body>
-    <nav class="navbar sticky-top navbar-expand-lg row border-bottom border-dark mx-4">
-        <div class="col">
-        <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php"><i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i></a>
+    <nav class="navbar sticky-top navbar-expand-lg d-flex border-bottom border-dark mx-4">
+        <div class="flex-grow-1">
+            <a class="navbar-brand mr-5 pl-2 text-danger" href="/index.php">
+                <i class="fas fa-chess-queen"><span class="ml-2">Pomodoro App</span></i>
+            </a>
         </div>
-        <div class="col-6"></div>
-        <div class="col d-flex justify-content-end">
-            <button id="toggleMode" class="btn btn-outline-dark mr-3"><i class="fas fa-moon"></i></button>
-            <div class="dropdown mr-3">
-                <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="/sharedSession.php">Créer une session partagée</a></li>
-                    <li><a class="dropdown-item" href="/joinSession.php">Rejoindre via un ID</a></li>
-                </ul>
-            </div>
-            <a href="/profil.php" class="btn btn-primary mr-3"><i class="fas fa-user"></i></a>
-            <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
+        <button id="toggleMode" class="btn btn-outline-dark mr-3"><i class="fas fa-moon"></i></button>
+        <div class="dropdown mr-3">
+            <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-share-alt"></i>
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="/createSession.php">Créer une session partagée</a></li>
+                <li><a class="dropdown-item" href="/joinSession.php">Rejoindre via un ID</a></li>
+            </ul>
         </div>
+        <a href="/profil.php" class="btn btn-primary mr-3"><i class="fas fa-user"></i></a>
+        <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
     </nav>
 
     <div class="container mt-5">

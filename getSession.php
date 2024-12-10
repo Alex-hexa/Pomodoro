@@ -1,18 +1,30 @@
 <?php
-require ("./session.php"); // Incluez le fichier qui gère les sessions
-
+require("./session.php");
 if (isset($_GET['sessionId'])) {
     $sessionId = $_GET['sessionId'];
-
-    // Récupérer les détails de la session
     $session = getActiveSession($sessionId);
-
     if ($session) {
-        echo json_encode(['status' => 'success', 'members' => $session['participants'], 'sessionDuration' => $session['timer']]);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Session not found.']);
+        $now = time();
+        // Vérifiez que startTime et initialDuration existent et qu'ils ne sont pas null
+        $startTime = $session['startTime'] ?? null;
+        $initialDuration = $session['initialDuration'] ?? null;
+
+        if ($startTime !== null && $initialDuration !== null && !$session['isPaused']) {
+            $endTime = $startTime + $initialDuration;
+            $remaining = max(0, $endTime - $now);
+        } else {
+            // Si le timer est en pause ou pas encore défini, utilisez $session['timer']
+            $remaining = $session['timer'];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'timer' => $remaining,
+            'isPaused' => $session['isPaused'],
+            'host' => $session['host'],
+            'participants' => $session['participants']
+        ]);
     }
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'No session ID provided.']);
+    echo json_encode(['status' => 'error', 'message' => 'Session ID manquant']);
 }
-?>

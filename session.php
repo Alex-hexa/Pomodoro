@@ -1,34 +1,55 @@
 <?php
-require ('./db.php'); // Incluez le fichier de connexion à MongoDB
+require ('./db.php'); 
 
 $client = getMongoClient();
-$collection = $client->myDatabase->sessions; // Remplacez "myDatabase" par le nom de votre base de données
+$collection = $client->myDatabase->sessions;
 
-// Fonction pour ajouter une session active
-function addActiveSession($sessionId, $hostName) {
+function createSession($hostName) {
     global $collection;
+    $sessionId = uniqid('sess_', true);
     $sessionData = [
         'sessionId' => $sessionId,
         'host' => $hostName,
-        'participants' => [$hostName], // Ajoutez l'hôte comme participant
-        'timer' => 1500, // Exemple de durée
-        'createdAt' => date("d/M/Y H:i:s") // Date actuelle
+        'participants' => [$hostName],
+        'timer' => 1500, // 25 min par défaut
+        'isPaused' => true,
+        'createdAt' => date('d/M/Y H:i:s')
     ];
     $collection->insertOne($sessionData);
+    return $sessionId;
 }
 
-// Fonction pour rejoindre une session active
 function joinActiveSession($sessionId, $participantName) {
     global $collection;
-    return $collection->updateOne(
+    $res = $collection->updateOne(
         ['sessionId' => $sessionId],
-        ['$addToSet' => ['participants' => $participantName]] // Ajoute le participant si ce n'est pas déjà dans la liste
+        ['$addToSet' => ['participants' => $participantName]]
     );
+    return $res->getModifiedCount() > 0;
 }
 
-// Fonction pour récupérer les détails d'une session active
 function getActiveSession($sessionId) {
     global $collection;
     return $collection->findOne(['sessionId' => $sessionId]);
 }
-?>
+
+function updateSessionTimer($sessionId, $timer, $isPaused) {
+    global $collection;
+    $collection->updateOne(
+        ['sessionId' => $sessionId],
+        ['$set' => ['timer' => $timer, 'isPaused' => $isPaused]]
+    );
+}
+
+function updateSessionTimerWithDuration($sessionId, $timer, $isPaused, $startTime, $initialDuration) {
+    global $collection;
+    $collection->updateOne(
+        ['sessionId' => $sessionId],
+        ['$set' => [
+            'timer' => $timer,
+            'isPaused' => $isPaused,
+            'startTime' => $startTime,
+            'initialDuration' => $initialDuration
+        ]]
+    );
+}

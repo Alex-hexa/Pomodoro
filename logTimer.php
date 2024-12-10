@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($data['userId']) && isset($data['duration'])) {
         $userId = $data['userId'];
         $duration = $data['duration'];
-        $uniq_id_timer = $data['uniq_id_timer'];
+        $uniq_id_timer = uniqid();
 
         // Now, log the timer duration in the database
         $client = getMongoClient();
