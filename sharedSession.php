@@ -183,9 +183,18 @@ $secs = $currentTimer % 60;
                     if (data.status === 'success') {
                         $('#chatMessages').empty();
                         const msgCount = data.messages.length;
+
                         data.messages.forEach(m => {
-                            $('#chatMessages').append(`<div>${m.user} : ${m.text}</div>`);
+                            let messageClass = '';
+                            if (m.user === sessionHost) {
+                                messageClass = 'text-danger';
+                            } else if (m.user === currentUser) {
+                                messageClass = 'text-primary';
+                            }
+
+                            $('#chatMessages').append(`<div><span class="${messageClass}">${m.user} :</span> ${m.text}</div>`);
                         });
+
                         $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
                         if (callback) callback(msgCount);
                     }
