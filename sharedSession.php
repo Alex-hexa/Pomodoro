@@ -38,6 +38,7 @@ $secs = $currentTimer % 60;
         const sessionUrl = "<?= $sessionUrl ?>";
 
         let timerInterval = null;
+        let lastOpenedMessageCount = 0; // Nombre de messages la dernière fois que le chat était ouvert
 
         function fetchSessionState() {
             $.getJSON('getSession.php', {
@@ -103,7 +104,6 @@ $secs = $currentTimer % 60;
                 });
             });
 
-            // Mise à jour de la durée par l'hôte
             $('#updateDurationBtn').on('click', function(e) {
                 e.preventDefault();
                 const h = parseInt($('#hoursInput').val()) || 0;
@@ -143,6 +143,84 @@ $secs = $currentTimer % 60;
                     }
                 }, 'json');
             });
+
+            // Bouton Chat
+            $('#chatToggleBtn').on('click', function() {
+                $('#chatWindow').toggle();
+                // Si on ouvre le chat, on charge les messages et met à jour lastOpenedMessageCount
+                if ($('#chatWindow').is(':visible')) {
+                    loadMessages(function(msgCount) {
+                        lastOpenedMessageCount = msgCount;
+                        hideChatBadge();
+                    });
+                }
+            });
+
+            $('#sendMessageBtn').on('click', function() {
+                const msg = $('#chatInput').val().trim();
+                if (msg) {
+                    $.post('sendMessage.php', {
+                        sessionId: sessionId,
+                        text: msg
+                    }, function(data) {
+                        if (data.status === 'success') {
+                            $('#chatInput').val('');
+                            loadMessages(function(msgCount) {
+                                // On met à jour lastOpenedMessageCount puisque le chat est ouvert
+                                lastOpenedMessageCount = msgCount;
+                            });
+                        } else {
+                            console.error(data.message);
+                        }
+                    }, 'json');
+                }
+            });
+
+            function loadMessages(callback) {
+                $.getJSON('getMessages.php', {
+                    sessionId: sessionId
+                }, function(data) {
+                    if (data.status === 'success') {
+                        $('#chatMessages').empty();
+                        const msgCount = data.messages.length;
+                        data.messages.forEach(m => {
+                            $('#chatMessages').append(`<div>${m.user} : ${m.text}</div>`);
+                        });
+                        $('#chatMessages').scrollTop($('#chatMessages')[0].scrollHeight);
+                        if (callback) callback(msgCount);
+                    }
+                });
+            }
+
+            // Rafraîchir le chat et badge toutes les 10s
+            setInterval(function() {
+                if ($('#chatWindow').is(':visible')) {
+                    loadMessages(function(msgCount) {
+                        lastOpenedMessageCount = msgCount;
+                    });
+                } else {
+                    // Chat fermé, on vérifie les nouveaux messages
+                    $.getJSON('getMessages.php', {
+                        sessionId: sessionId
+                    }, function(data) {
+                        if (data.status === 'success') {
+                            const msgCount = data.messages.length;
+                            const diff = msgCount - lastOpenedMessageCount;
+                            if (diff > 0) {
+                                showChatBadge(diff);
+                            }
+                        }
+                    });
+                }
+            }, 10000);
+
+            function showChatBadge(count) {
+                $('#chatBadge').text(count).show();
+            }
+
+            function hideChatBadge() {
+                $('#chatBadge').hide();
+            }
 
         });
     </script>
@@ -236,7 +314,7 @@ $secs = $currentTimer % 60;
 
         <div class="reaction-container">
             <button id="reactionBtn" class="btn btn-info"><i class="fa-solid fa-icons"></i></button>
-            <div id="emojiMenu">
+            <div id="emojiMenu" style="display:none;">
                 <span class="emoji-option">😊</span>
                 <span class="emoji-option">😎</span>
                 <span class="emoji-option">👍</span>
@@ -246,6 +324,19 @@ $secs = $currentTimer % 60;
                 <span class="emoji-option">🤩</span>
                 <span class="emoji-option">🐨</span>
                 <span class="emoji-option">❤️</span>
+            </div>
+        </div>
+
+        <!-- Ajouter un badge indiquant le nombre de nouveaux messages -->
+        <button id="chatToggleBtn" class="btn btn-primary" style="position:fixed; bottom:20px; right:20px; z-index:9999;">
+            <i class="fa-solid fa-comments"></i> <span id="chatBadge" class="badge bg-danger" style="display:none;"></span>
+        </button>
+
+        <div id="chatWindow" style="display:none; position:fixed; bottom:60px; right:20px; width:300px; height:400px; background:#fff; border:1px solid #ccc; z-index:9999; display:flex; flex-direction:column;">
+            <div id="chatMessages" style="flex:1; overflow-y:auto; padding:10px; font-family:monospace;"></div>
+            <div id="chatInputContainer" style="border-top:1px solid #ccc; display:flex;">
+                <input type="text" id="chatInput" placeholder="Taper votre message..." style="flex:1; padding:5px; border:none; outline:none;">
+                <button id="sendMessageBtn" style="background:#007bff; border:none; color:#fff; padding:5px 10px; cursor:pointer;">Envoyer</button>
             </div>
         </div>
     </div>

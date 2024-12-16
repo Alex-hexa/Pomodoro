@@ -23,11 +23,17 @@ $initialDuration = $session['initialDuration'] ?? null;
 switch ($action) {
     case 'start':
         if ($isPaused) {
-            // On "redémarre" le timer à partir du temps restant
-            // Si startTime et initialDuration sont déjà définis, on les remet à jour
-            // Ici, on considère qu'on repars depuis timer actuel
-            $selectedDuration = $currentTimer; // Le temps restant devient la nouvelle durée initiale
+            // Redémarrage à partir du temps restant actuel
+            $selectedDuration = $currentTimer;
             updateSessionTimerWithDuration($sessionId, $selectedDuration, false, time(), $selectedDuration);
+        } else {
+            // Si le timer n'est pas en pause, mais pas de startTime/initialDuration
+            // On considère qu'on lance le timer pour la première fois
+            if ($startTime === null || $initialDuration === null) {
+                $selectedDuration = $currentTimer;
+                updateSessionTimerWithDuration($sessionId, $selectedDuration, false, time(), $selectedDuration);
+            }
+            // Sinon, si le timer est déjà en cours, pas besoin de faire quoi que ce soit
         }
         break;
 
@@ -63,13 +69,20 @@ switch ($action) {
             echo json_encode(['status' => 'error', 'message' => 'Seul l’hôte peut modifier la durée du timer']);
             exit;
         }
-
         $newDuration = (int)($_POST['duration'] ?? 1500);
         updateSessionTimer($sessionId, $newDuration, true);
-        // Optionnel : supprimer startTime et initialDuration si vous les utilisez
         $client = getMongoClient();
         $collection = $client->myDatabase->sessions;
         $collection->updateOne(['sessionId' => $sessionId], ['$unset' => ['startTime' => '', 'initialDuration' => '']]);
+        break;
+
+        // Supposons que l'action 'endSession' existe
+    case 'endSession':
+        $collection->updateOne(
+            ['sessionId' => $sessionId],
+            ['$unset' => ['messages' => '']]
+        );
+        echo json_encode(['status' => 'success']);
         break;
 
     default:
