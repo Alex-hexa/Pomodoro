@@ -17,13 +17,12 @@ function generateSessionId() {
 
 const session = generateSessionId();
 
-// Fonction pour décoder le JWT
+// Décoder le JWT
 function decodeJWT(token) {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload; // Retourne le payload
+    return payload;
 }
 
-// Vérifie si le token est présent
 const jwt = getToken();
 
 if (jwt) {
@@ -36,36 +35,29 @@ if (jwt) {
     document.cookie = `username=${username}`;
     document.cookie = `session=${session}`;
     document.cookie = `uniq_id=${uniq_id}`;
-
-    console.log("JWT:", jwt);
-    console.log("Decoded Token:", decoded);
+    // ! Ici le cookie est créé pour stocker les informations de l'utilisateur et le passer à la page suivante
     
-    // Mettre à jour le contenu de la page avec le nom d'utilisateur
+    // ! Mettre à jour le contenu de la page avec le nom d'utilisateur
     document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('username').textContent = username;
         document.getElementById('userId').textContent = userId;
         document.getElementById('session').textContent = session;
         document.getElementById('uniq_id').textContent = uniq_id;
-
-        // Ici, vous pouvez éventuellement récupérer les minuteurs si nécessaire, 
-        // mais cela sera désormais géré dans `index.php`.
     });
 } else {
-    // Si le token n'est pas présent, rediriger vers la page de connexion
+    // * Si le token n'est pas présent, rediriger vers la page de connexion
     window.location.href = 'login.php';
 }
 
 function createSessionUrl() {
-    const date = new Date(); // Get current date
+    const date = new Date();
     const formattedDate = date.toLocaleString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })
         .replace(/\//g, '-')
         .replace(',', '')
         .replace(/:/g, '-');
 
     const sessionUrl = `sharedSession.php?date=${formattedDate}`;
-    console.log("Share this URL:", sessionUrl);
-    // Optionally copy to clipboard or show to user
 }
 
-// Call this function when the session is created or when sharing is needed
+// ! On s'assure que le DOM est chargé avant d'exécuter le code
 createSessionUrl();

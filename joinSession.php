@@ -12,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-<!-- Formulaire HTML -->
 <!DOCTYPE html>
 <html lang="fr">
 

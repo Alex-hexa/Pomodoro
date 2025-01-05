@@ -201,7 +201,7 @@ $secs = $currentTimer % 60;
                 });
             }
  
-            // Rafraîchir le chat et badge toutes les 10s
+            // Rafraîchir le chat et badge
             setInterval(function() {
                 if ($('#chatWindow').is(':visible')) {
                     loadMessages(function(msgCount) {
@@ -255,6 +255,8 @@ $secs = $currentTimer % 60;
         <a href="/logout.php" class="btn btn-danger mr-4"><i class="fas fa-right-from-bracket"></i></a>
     </nav>
 
+   <!--
+    // ! Modal pour expliquer comment copier le lien (Plus d'actualité)
     <div class="modal fade" id="clickForCopy" tabindex="-1" aria-labelledby="clickForCopyLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -264,6 +266,7 @@ $secs = $currentTimer % 60;
                 </div>
                 <div class="modal-body">
                     Cliquez sur le numéro de session pour copier le lien.
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success" data-bs-dismiss="modal"><i class="fa-solid fa-check"></i></button>
@@ -271,12 +274,12 @@ $secs = $currentTimer % 60;
             </div>
         </div>
     </div>
-
+ -->
     <div class="container-fluid pt-4">
         <div id="copyMessage" class="alert alert-success" style="display:none;">
             Le lien de la session a été copié !
         </div>
-        <h2>Session: <span id="sessionIdSpan" class="text-success" style="cursor: pointer;"><?= htmlspecialchars($sessionId) ?></span><span style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#clickForCopy" class="ml-2 text-success"><i class="fa-solid fa-circle-info"></i></span></h2>
+        <h2>Session: <span id="sessionIdSpan" class="text-success" style="cursor: pointer;"><?= htmlspecialchars($sessionId) ?><span class="btn btn-dark ml-2 align-items-start"><i class="fa-solid fa-up-right-from-square"></i></span></span></h2>
         <h3 class="py-2">Hôte: <span class="text-danger"><?= htmlspecialchars($session['host']) ?></span></h3>
         <h3 class="pb-1">Vous êtes: <span class="text-primary"><?= htmlspecialchars($userName) ?> <?= $isHost ? '(Hôte)' : '' ?></span></h3>
 

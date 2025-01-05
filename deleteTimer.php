@@ -4,7 +4,6 @@ require 'db.php';
 if (isset($_POST['uniq_id_timer'])) {
     $timerId = $_POST['uniq_id_timer'];
 
-    // Connexion à MongoDB
     $client = getMongoClient();
     $collection = $client->myDatabase->timers;
 

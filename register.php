@@ -6,8 +6,8 @@ use PHPMailer\PHPMailer\Exception;
 
 require 'vendor/autoload.php'; // Inclure les dépendances de PHPMailer
 
-$my_email = $_ENV['MY_EMAIL_ID']; // Remplacer par votre adresse email
-$my_email_mdp = $_ENV['MY_EMAIL_MDP']; // Remplacer par le mot de passe de votre adresse email
+$my_email = $_ENV['MY_EMAIL_ID'];
+$my_email_mdp = $_ENV['MY_EMAIL_MDP'];
 
 $client = getMongoClient();
 $collection = $client->myDatabase->users;
@@ -52,12 +52,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             // Configurer PHPMailer
             $mail->isSMTP();
-            $mail->Host = 'smtp.office365.com'; // Remplacez par votre serveur SMTP
+            $mail->Host = 'smtp.office365.com'; // * Serveur SMTP
             $mail->SMTPAuth = true;
-            $mail->Username = $my_email; // Votre adresse email
-            $mail->Password = $my_email_mdp; // Mot de passe de l'email
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            $mail->Username = $my_email;
+            $mail->Password = $my_email_mdp;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Activer le cryptage TLS
+            $mail->Port = 587; // * Port SMTP
             $mail->CharSet = 'UTF-8'; // Configurer l'encodage UTF-8
 
             // Configurer l'email

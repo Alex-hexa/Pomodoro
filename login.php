@@ -2,9 +2,6 @@
 require 'db.php'; // Inclure le fichier de connexion
 use \Firebase\JWT\JWT;
 
-// Démarrer la session
-session_start();
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usernameOrEmail = htmlspecialchars($_POST['username_or_email']); // Prendre soit le nom d'utilisateur soit l'email
     $password = $_POST['password']; // Récupérer le mot de passe
@@ -19,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $payload = [
             'username' => $user['username'],
             'email' => $user['email'],
-            'userId' => (string)$user['_id'], // Add the user ID
+            'userId' => (string)$user['_id'],
             'uniq_id' => $user['uniq_id'],
             'iat' => time(), // Date de création
             'exp' => time() + (12 * 60 * 60) // Expire dans 12 heures
@@ -32,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit(); // Arrêter le script après avoir envoyé la réponse
     } else {
         // Erreur de connexion
-        http_response_code(401); // Unauthorized
+        http_response_code(401);
         $error = "Nom d'utilisateur ou mot de passe incorrect.";
     }
 }

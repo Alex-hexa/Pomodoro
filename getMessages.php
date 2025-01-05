@@ -1,6 +1,6 @@
 <?php
 require('./session.php');
-$sessionId = $_GET['sessionId'] ?? ''; // Utilisez GET car vous faites un $.getJSON
+$sessionId = $_GET['sessionId'] ?? '';
 if (!$sessionId) {
     echo json_encode(['status' => 'error', 'message' => 'Session ID manquant']);
     exit;

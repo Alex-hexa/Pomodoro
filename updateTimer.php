@@ -55,7 +55,6 @@ switch ($action) {
         $selectedDuration = 1500;
         // On indique que le timer est en pause (pour qu'il attende un start)
         updateSessionTimer($sessionId, $selectedDuration, true);
-        // Optionnel : supprimer startTime et initialDuration si on les avait
         $client = getMongoClient();
         $collection = $client->myDatabase->sessions;
         $collection->updateOne(
@@ -76,7 +75,8 @@ switch ($action) {
         $collection->updateOne(['sessionId' => $sessionId], ['$unset' => ['startTime' => '', 'initialDuration' => '']]);
         break;
 
-        // Supposons que l'action 'endSession' existe
+    /*
+    TODO: Implementer la fin de session
     case 'endSession':
         $collection->updateOne(
             ['sessionId' => $sessionId],
@@ -84,7 +84,7 @@ switch ($action) {
         );
         echo json_encode(['status' => 'success']);
         break;
-
+    */
     default:
         echo json_encode(['status' => 'error', 'message' => 'Action inconnue']);
         exit;

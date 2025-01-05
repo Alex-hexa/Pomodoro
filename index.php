@@ -81,7 +81,7 @@
     </div>
 
     <script>
-        // Toggle dark mode
+        // * Dark mode
         document.getElementById('toggleMode').onclick = function() {
             const body = document.getElementById('pageBody');
             body.classList.toggle('bg-dark');
@@ -89,18 +89,18 @@
             body.classList.toggle('bg-light');
             body.classList.toggle('text-dark');
 
-            const navbar = document.querySelector('nav'); // Select the nav element
-            navbar.classList.toggle('border-light'); // Change border to light in dark mode
-            navbar.classList.toggle('border-dark'); // Change border to dark in light mode
+            const navbar = document.querySelector('nav');
+            navbar.classList.toggle('border-light');
+            navbar.classList.toggle('border-dark');
 
             const timerList = document.getElementById('timerList');
-            timerList.classList.toggle('bg-dark'); // Toggle dark background for timer list
-            timerList.classList.toggle('text-light'); // Toggle light text for timer list
+            timerList.classList.toggle('bg-dark');
+            timerList.classList.toggle('text-light');
 
             const listItems = timerList.getElementsByTagName('li');
             for (let i = 0; i < listItems.length; i++) {
-                listItems[i].classList.toggle('bg-light'); // Change item background to dark mode
-                listItems[i].classList.toggle('text-dark'); // Change item text to light mode
+                listItems[i].classList.toggle('bg-light');
+                listItems[i].classList.toggle('text-dark');
             }
 
             const toggleButton = document.getElementById('toggleMode');

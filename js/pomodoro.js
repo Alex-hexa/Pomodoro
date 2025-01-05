@@ -9,32 +9,28 @@ document.getElementById('startTimer').onclick = async function () {
 
     totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
 
-    // Disable the start button and enable pause/reset buttons
     document.getElementById('startTimer').disabled = true;
     document.getElementById('pauseTimer').disabled = false;
     document.getElementById('resetTimer').disabled = false;
 
-    // Log the timer duration in the database
     await logTimerDuration(totalSeconds);
 
     updateCountdown();
 };
 
 async function logTimerDuration(duration) {
-    // Retrieve the token from sessionStorage
     const token = sessionStorage.getItem('jwtToken');
 
     console.log("Logging timer duration. Token:", token);
 
     if (!token) {
         console.error("No token found in session storage.");
-        return; // Exit if there's no token
+        return;
     }
 
-    const userId = JSON.parse(atob(token.split('.')[1])).userId; // Decode the token to get the user ID
+    const userId = JSON.parse(atob(token.split('.')[1])).userId;
     console.log("User ID:", userId);
 
-    // Sending the request to log the timer duration
     const response = await fetch('http://localhost:8080/logTimer.php', {
         method: 'POST',
         headers: {
@@ -55,24 +51,24 @@ async function logTimerDuration(duration) {
 }
 
 document.getElementById('resetTimer').onclick = function () {
-    clearInterval(interval); // Clear the interval
-    totalSeconds = 0; // Reset the total seconds
-    document.getElementById('countdown').innerHTML = "0h 0m 0s"; // Reset display
-    document.getElementById('startTimer').disabled = false; // Enable start button
-    document.getElementById('pauseTimer').disabled = true; // Disable pause button
-    document.getElementById('resetTimer').disabled = true; // Disable reset button
+    clearInterval(interval);
+    totalSeconds = 0;
+    document.getElementById('countdown').innerHTML = "0h 0m 0s";
+    document.getElementById('startTimer').disabled = false;
+    document.getElementById('pauseTimer').disabled = true;
+    document.getElementById('resetTimer').disabled = true;
 };
 
 function updateCountdown() {
     if (totalSeconds <= 0) {
         document.getElementById('countdown').innerHTML = "Temps écoulé!";
-        confetti(); // Animation de confettis
+        confetti();
         clearInterval(interval);
         return;
     }
 
     interval = setInterval(() => {
-        if (isPaused) return; // If paused, skip decrementing
+        if (isPaused) return;
 
         const hrs = Math.floor(totalSeconds / 3600);
         const mins = Math.floor((totalSeconds % 3600) / 60);
@@ -84,27 +80,25 @@ function updateCountdown() {
         if (totalSeconds < 0) {
             clearInterval(interval);
             document.getElementById('countdown').innerHTML = "Temps écoulé !";
-            confetti(); // Animation de confettis
+            confetti();
         }
     }, 1000);
 }
 
-// Pause and resume functionality
+// Fonctionnalité de pause et reprendre
 document.getElementById('pauseTimer').onclick = function () {
     if (isPaused) {
-        isPaused = false; // Resume the timer
-        this.innerText = "Pause"; // Change button text to "Pause"
-        updateCountdown(); // Start counting down again
+        isPaused = false;
+        this.innerText = "Pause";
+        updateCountdown();
     } else {
-        isPaused = true; // Pause the timer
-        clearInterval(interval); // Clear the interval
-        this.innerText = "Reprendre"; // Change button text to "Reprendre"
+        isPaused = true;
+        clearInterval(interval);
+        this.innerText = "Reprendre";
     }
 };
 
-// Fonction pour afficher une alerte Bootstrap
 function showBootstrapAlert(message, type = 'success') {
-    // type peut être 'success', 'danger', 'warning', 'info', etc.
     const alertContainer = document.createElement('div');
     alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
     alertContainer.setAttribute('role', 'alert');
@@ -115,16 +109,14 @@ function showBootstrapAlert(message, type = 'success') {
         </button>
     `;
 
-    // Ajouter l'alerte en haut de la page ou dans un container dédié
     document.querySelector('body').prepend(alertContainer);
 
-    // Optionnel : auto-fermeture de l'alerte après quelques secondes
+    // ! Auto-fermeture de l'alerte après quelques secondes
     setTimeout(() => {
         (alertContainer).alert('close');
     }, 3000);
 }
 
-// Votre fonction deleteTimer modifiée :
 async function deleteTimer(uniq_id_timer) {
     if (confirm("Êtes-vous sûr de vouloir supprimer ce minuteur ?")) {
         const response = await fetch('deleteTimer.php', {
@@ -145,10 +137,10 @@ async function deleteTimer(uniq_id_timer) {
     }
 }
 
-// Function to refresh the timer list
+// Fonction qui actualise la liste des minuteurs
 async function refreshTimerList() {
-    const response = await fetch('getTimers.php'); // Fetch the updated timer list
-    const timersHtml = await response.text(); // Get the HTML response
+    const response = await fetch('getTimers.php');
+    const timersHtml = await response.text(); 
     const timerList = document.getElementById('timerList');
-    timerList.innerHTML = timersHtml; // Update the timer list with new content
+    timerList.innerHTML = timersHtml;
 }

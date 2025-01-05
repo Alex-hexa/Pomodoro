@@ -1,17 +1,16 @@
 <?php
 require 'db.php';
 
-// Vérifier si l'utilisateur est connecté via un cookie
 if (!isset($_COOKIE['userId'])) {
-    header('Location: login.php'); // Rediriger si l'utilisateur n'est pas connecté
+    header('Location: login.php'); // * Rediriger si l'utilisateur n'est pas connecté
     exit();
 }
 
-$uniq_id = $_COOKIE['uniq_id']; // Obtenir l'ID utilisateur depuis le cookie
+$uniq_id = $_COOKIE['uniq_id']; // ! Obtenir l'ID utilisateur depuis le cookie
 
 // Connexion à MongoDB
 $client = getMongoClient();
-$collection = $client->myDatabase->users; // Remplacer 'myDatabase' par votre base de données
+$collection = $client->myDatabase->users;
 
 // Récupérer les informations de l'utilisateur avec ObjectId simulé
 $uniq = $collection->findOne(['uniq_id' => $uniq_id]);
@@ -21,9 +20,7 @@ if (!$uniq) {
     exit();
 }
 
-// Traitement du formulaire de mise à jour
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Récupérer les nouvelles informations du formulaire
     $newUsername = $_POST['username'] ?? $uniq['username'];
     $newEmail = $_POST['email'] ?? $uniq['email'];
     $newPassword = $_POST['password'] ?? null;

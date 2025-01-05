@@ -2,7 +2,13 @@
 
 ## Feature
 - Pipeline
+- Test unitaire
 - CRUD
 - JWT Token
 - Bootstrap
 - PHP/JS
+
+## Fonctionnalité
+- Minuteur
+- Session partagée
+- Thème sombre
