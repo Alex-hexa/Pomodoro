@@ -200,7 +200,7 @@ $secs = $currentTimer % 60;
                     }
                 });
             }
-
+ 
             // Rafraîchir le chat et badge toutes les 10s
             setInterval(function() {
                 if ($('#chatWindow').is(':visible')) {
