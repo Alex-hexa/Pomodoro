@@ -2,9 +2,9 @@
 require 'vendor/autoload.php';
 use Dotenv\Dotenv;
 
+// * Charger les variables d'environnement
 $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-
 
 function getMongoClient()
 {
@@ -25,5 +25,4 @@ function getJwtSecret()
 function uniq_id(){
     return bin2hex(random_bytes(12)); // Générer un identifiant unique
 }
-
 ?>
