@@ -2,4 +2,7 @@ package-lock.json
 node_modules
 vendor
 composer.lock
-.env
+*.env
+*.env.example
+*.env.local
+*.env.staging
