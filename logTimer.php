@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (isset($data['userId']) && isset($data['duration'])) {
-        $userId = $data['userId'];
+        $userId = $_COOKIE['uniq_id'];
         $duration = $data['duration'];
         $uniq_id_timer = uniqid();
 

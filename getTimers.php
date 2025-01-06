@@ -11,8 +11,8 @@ $options = [
 
 // ! Obtenez l'ID utilisateur à partir du cookie de jstDecode.js
 if($userId = $_COOKIE['userId']){
-    
-    $timers = $collection->find(['userId' => $userId], $options);
+    $uniqIdUser = $_COOKIE['uniq_id'];
+    $timers = $collection->find(['userId' => $uniqIdUser], $options);
     
     // Convertir les documents en tableau
     $timersArray = [];
